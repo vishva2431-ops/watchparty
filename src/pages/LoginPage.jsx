@@ -8,43 +8,43 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const mobileLogin = async () => {
-    if (!name.trim() || !mobile.trim()) {
-      setMessage("Enter name and mobile number");
-      return;
-    }
+  const handleMobileLogin = async () => {
+  try {
+    const res = await API.post("/auth/mobile-login", {
+      name,
+      mobile,
+    });
 
-    try {
-      const res = await API.post("/auth/mobile-login", { name, mobile });
+    localStorage.setItem("userName", res.data.name || name);
+    localStorage.setItem("userMobile", res.data.mobile || mobile);
+    localStorage.setItem("loginMethod", "MOBILE");
 
-      localStorage.setItem("userName", res.data.name || name);
-      localStorage.setItem("userMobile", res.data.mobile || mobile);
-      localStorage.setItem("loginMethod", "MOBILE");
+    setMessage("Login successful ✅");
+    setTimeout(() => navigate("/home"), 800);
+  } catch (err) {
+    console.error("Mobile login error:", err);
+    setMessage("Mobile login failed ❌");
+  }
+};
 
-      setMessage("Login successful ✅");
-      setTimeout(() => navigate("/home"), 900);
-    } catch (err) {
-      console.error(err);
-      setMessage("Mobile login failed ❌");
-    }
-  };
+ const handleGuestLogin = async () => {
+  try {
+    const guestName = name.trim() || "Guest";
 
-  const guestLogin = async () => {
-    try {
-      const guestName = name.trim() || "Guest";
-      const res = await API.post("/auth/guest", { name: guestName });
+    const res = await API.post("/auth/guest", {
+      name: guestName,
+    });
 
-      localStorage.setItem("userName", res.data.name || guestName);
-      localStorage.removeItem("userMobile");
-      localStorage.setItem("loginMethod", "GUEST");
+    localStorage.setItem("userName", res.data.name || guestName);
+    localStorage.setItem("loginMethod", "GUEST");
 
-      setMessage("Guest login successful ✅");
-      setTimeout(() => navigate("/home"), 900);
-    } catch (err) {
-      console.error(err);
-      setMessage("Guest login failed ❌");
-    }
-  };
+    setMessage("Guest login successful ✅");
+    setTimeout(() => navigate("/home"), 800);
+  } catch (err) {
+    console.error("Guest login error:", err);
+    setMessage("Guest login failed ❌");
+  }
+};
 
   return (
     <div className="page center-page">
